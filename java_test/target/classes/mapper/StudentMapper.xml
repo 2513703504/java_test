@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ctbu.mapper.StudentMapper">
+
+    <select id="queryStudent" resultMap="students">
+        select * from student,sex where student.sex=sex.id
+    </select>
+    <resultMap id="students" type="Student" autoMapping="true">
+        <result property="id" column="id"></result>
+        <result property="stuName" column="stud_name"></result>
+        <result property="sex" column="gender"></result>
+        <result property="grade" column="grade"></result>
+    </resultMap>
+
+    <delete id="deleteStudent">
+        delete from student where id=#{id}
+    </delete>
+
+    <insert id="addStudent">
+        insert into student(stud_name,sex,grade) values(#{student.stuName},#{gender},#{student.grade})
+    </insert>
+
+
+    <select id="queryStudentDetail" resultMap="Student">
+        SELECT * FROM (SELECT temp2.sid,temp2.stud_name,temp2.grade,temp2.course_name,temp2.credit,sex.gender FROM (SELECT * FROM (SELECT stu_id,course_id,id sid,stud_name,sex,grade FROM stu_course LEFT JOIN student ON stu_course.stu_id=student.id) as temp LEFT JOIN course ON course.id=temp.course_id) as temp2,sex WHERE temp2.sex=sex.id) as temp3 WHERE temp3.sid=#{id};
+    </select>
+
+    <resultMap id="Student" type="Student">
+        <result property="id" column="sid"></result>
+        <result property="stuName" column="stud_name"></result>
+        <result property="grade" column="grade"></result>
+        <result property="sex" column="gender"></result>
+        <collection property="courses" ofType="Course" autoMapping="true">
+            <result property="courseName" column="course_name" ></result>
+            <result property="credit" column="credit"></result>
+        </collection>
+    </resultMap>
+
+    <select id="queryStudentByCondition" resultMap="students">
+        select * from student,sex
+        <where>
+            <if test="student.stuName!=null">
+                and stud_name like concat("%",#{student.stuName},"%")
+            </if>
+            <if test="student.grade!=null">
+                and grade=#{student.grade}
+            </if>
+            <if test="gender!=null">
+                and sex=#{gender}
+            </if>
+        </where> and student.sex=sex.id
+    </select>
+
+    <update id="updateStudent">
+        update student set stud_name=#{student.stuName},grade=#{student.grade},sex=#{gender} where id=#{student.id}
+    </update>
+</mapper>
